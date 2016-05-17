@@ -1,3 +1,5 @@
+# coding=UTF-8
+
 '''
 Networking Module
 by Hosung Lee (runway3207@hanmail.net)
