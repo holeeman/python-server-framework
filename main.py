@@ -1,6 +1,9 @@
 # coding=UTF-8
+from networking import *
+import struct
 
 alive = True
+server = ServerSocket("", 12345)
 
 while alive:
     command = raw_input("").split(" ")
