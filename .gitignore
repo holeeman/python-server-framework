@@ -1,3 +1,4 @@
 *.name
 *.xml
+*.pyc
 .idea/python server framework.iml

@@ -13,12 +13,13 @@ import json
 import struct
 
 NET_SOCKET_CREATED = 100
-NET_SOCKET_CLOSED = 500
+NET_SOCKET_CLOSED = 150
 NET_CLIENT_CONNECTED = 110
-NET_CLIENT_DISCONNECTED = 510
+NET_CLIENT_DISCONNECTED = 151
 NET_CONNECTION_ACCEPTED = 111
 NET_CONNECTION_ESTABLISHED = 112
-NET_CONNECTION_CLOSED = 511
+NET_CONNECTION_PING = 113
+NET_CONNECTION_CLOSED = 114
 NET_HEADER = 137
 
 
@@ -189,6 +190,11 @@ class NetworkingSocket(threading.Thread):
         self.sending_queue.put(message)
         self.sending_queue_lock.release()
 
+    def ping(self, soc):
+        new_message = Message()
+        new_message.write("flag", NET_CONNECTION_PING)
+        self.send(soc, new_message)
+
 
 class ServerSocket(NetworkingSocket):
     def run(self):
@@ -283,9 +289,14 @@ class ServerSocket(NetworkingSocket):
     def get_client_list(self):
         # get client list of current server
         self.list_lock.acquire()
-        _list =  self.client_list.values()
+        _list = self.client_list.values()
         self.list_lock.release()
         return _list
+
+    def check_client_connection(self):
+        for c in self.get_client_list():
+            self.ping(c.socket)
+        return True
 
 
 class ClientSocket(NetworkingSocket):
@@ -320,6 +331,7 @@ class ClientSocket(NetworkingSocket):
     def connect(self):
         # connect to server
         self.socket.connect((self.host, self.port))
+        self.start()
 
     def disconnect(self, soc):
         # message to myself for notification
